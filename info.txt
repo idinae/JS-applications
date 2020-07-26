@@ -50,7 +50,35 @@
     * git init
     * добавяме файл .gitignore, за да не качва всичко
     * git add .gitignore
+    * git commit -m "added ignore file"
+    * git add *.*
+    * git commit -m "initial project files"
+    * създаваме ново repository в github и изпълняваме дадените command lines:
+    git remote add origin https://github.com/idinae/JS-applications.git
+    git push -u origin master
 3. Пишем приложението
+  - зареждаме в index.html модула, който ще създаваме:
+    <script src="./js/data.js"></script>
+    тестваме дали работи: alert('it works!');
+  - в data.js:
+    * тук функциите вършат работа, без да валидират
+    * докато data.js не е зареден като модул в index.html, функциите са видни в глобалния скоуп
+    * function host(endpoint) + обект endpoints
+      -> в localStorage с метода localStorage.setItem('item-name', 'item-value') - взимаме от респонса на логина user-token, username, userId и ги записваме в localStorage
+    * function register(username, password) - тестваме я през браузъра с await (защото връща отговор)
+    * function login(username, password) - тестваме я през браузъра
+    * function logout() - без await, защото връща празен отговор и не го обръщаме в json(); после се вика с await, за да е сигурно, че юзърът е разлогнат
+      logout - GET, в headers се подава user-token; за да го подадем, първо трябва да го съхраним 
+      -> ако сме разлогнати и пробваме да пуснем заявка през Postman със същия token - казва ни, че не е валиден
+      -> от localStorage си взимаме данни с метода localStorage.getItem('item-name') или пък предварително сме си ги записали в const
+    * function getMovies() - когато методът е GET, по принцип не ни трябват опции, но щом връща отговор, резултиращият обект трябва да отиде в json() и е с async / await
+      понеже настроихме нерегистриран юзър да не може да чете -> ще трябват опции, за да пратим token-a
+    * function getMovieById() - също с token
+    * function createMovie() - POST, token, body
+    * function updateMovie() - PUT, token, body (само частта, която се ъпдейтва)
+    * function deleteMovie() - DELETE, връща час на изтриване
+    * function getMoviesByOwner() - с Where клауза, вж Backendless - Advanced Object Retrieval
+
   - правим модула за връзка с базата за CRUD операции и login/register на потребителя
     (без да ги визуализираме в html-a, закачаме функциите към глобалния scope и ги викаме в конзолата)
   - цепим html-a на основни шаблони
