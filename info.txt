@@ -1,0 +1,82 @@
+//СЪЗДАВАНЕ НА НОВ ПРОЕКТ
+
+5 СТЪПКИ в един проект:
+1. Преглеждаме заданието и ресурсите, с които разполагаме
+2. Да се преценят задачите, които трябва да изпълним, и техния обем
+3. Да помислим за архитектурата: библиотеки, разделяне на кода на модули, кои ще са домейните, които ще вършат работа,
+какви инструменти ще ползваме
+4. Да се определи работната последователност, графика
+5. Да реализираме и тестваме проекта
+---------------------------------------------------------------------------------------------------------------
+НАШИТЕ СТЪПКИ (т. 4 - работна последователност):
+
+1. Създаване и настройване на приложение в Backendless
+  - определяме как ще изглежда един обект (филм) в приложението
+  - създаваме на таблиците Backendless
+    * ако потребителят не е аутентификиран - да може само да създава данни, за да може да се регистрира: User - Security Roles - create "V"; за четене: включваме и find
+    * ако потребителят трябва да се логва с username - променяме users - name да е identity, махаме constraints от email
+  - тестване на таблиците в Postman
+    * registration - POST, body: row, json с имената на полетата, както сме ги настроили (username, password), header: нищо
+      https://api.backendless.com/application-id/REST-api-key/users/register --POST
+    * login - същото, но username го сменяме с login!!!!!!!!!! - връща ни token
+      https://api.backendless.com/application-id/REST-api-key/users/login --POST
+    * заявки от името на регистрирания user: в headers добавяме key: user-token с value получения token
+    * четене на всички данни: GET
+      https://api.backendless.com/<application-id>/<REST-api-key>/data/<table-name>
+    * четене на данните вкл. relations: GET
+      GET http://api.backendless.com/[application-id]/[REST-api-key]/data/[TABLE-NAME]/[OBJECT-ID]?loadRelations=[RELATED-PROPERTY-NAME][,RELATED-PROPERTY-NAME]
+    * цялата таблица с всички relations: GET
+      GET http://api.backendless.com/[application-id]/[REST-api-key]/data/[TABLE-NAME]?loadRelations=[RELATED-PROPERTY-NAME]
+    * добавяне на relations (set relation): POST
+      https://api.backendless.com/<application-id>/<REST-api-key>/data/<table-name>/<parentObjectId>/<relationName>
+      body: array with child ids ["958BE6CF-7EE6-4887-9369-781817BDD010", "FDAC15A8-7B8F-45AB-8DEA-46B96E41B5EA"]
+    * update на филм: PUT
+      https://api.backendless.com/<application-id>/<REST-api-key>/data/<table-name>/<object-id> 
+    * без relations: ако ще се въвеждат като стринг, а не с objectId - по-лесно е да няма релации - въвежда се стрингова колона
+
+2. Настройваме приложението
+  - инсталираме библиотеки - задължителните за проекта и тези, които ние ще ползваме: 
+    * npm i - инсталира нужното от package.json
+    * npm i --save sammy (npm i -E sammy)
+    * npm i --save handlebars
+    * npm audit fix - fix-ва някои vulnerability в инсталираните plugins
+  - настройваме index.html да чете библиотеките - базовите библиотеки трябва да са в head!!!!!!!!
+    * местим тези, които са базови и са в body и добавяме останалите: sammy и handlebars + plugin за handlebars в sammy:
+      <script src="./node_modules/handlebars/dist/handlebars.min.js"></script>
+      <script src="./node_modules/sammy/lib/min/sammy-0.7.6.min.js"></script>
+      <script src="./node_modules/sammy/lib/min/plugins/sammy.handlebars-0.7.6.min.js"></script>
+    * отваряме index.html, за да видим, че не ни дава грешки в конзолата
+  - публикуване в github: 
+    * git init
+    * добавяме файл .gitignore, за да не качва всичко
+    * git add .gitignore
+3. Пишем приложението
+  - правим модула за връзка с базата за CRUD операции и login/register на потребителя
+    (без да ги визуализираме в html-a, закачаме функциите към глобалния scope и ги викаме в конзолата)
+  - цепим html-a на основни шаблони
+  - правим рутирането, така че да можем да отворим всеки предвиден html
+  - правим скелетите на контролерите
+  - правим индивидуалната бизнес логика на всеки контролер като почваме от login/register
+
+
+//ПОДГОТОВКА
+
+//от директорията на проекта през терминала стартираме
+npm init -y //създава package.json; като качваме файловете в github, не е нужно да качваме библиотеките, пускаме npm install и се инсталират всички библиотеки, които ги има в package.json и са нужни за проекта
+npm i --save jquery //нужен за sammy, което е библиотека на jquery; --save или -E указва да се запази в package.json
+npm i --savе sammy
+npm i --savе handlebars
+npm i --save bootstrap //ако е необходимо
+
+* при създаване на local-web-server правим запис в package.json, "scripts"
+"serve": "ws --spa index.html" - показва след рифреш къде да се връщаме, иначе може да търси ресурси от линк, каквито нямаме
+
+//за всички приложения зареждаме
+в index.html в head зареждаме в скриптовете в следния ред:
+1. jQuery - защото се ползва и от останалите
+2. bootstrap /ако се ползва/
+3. handlebars
+4. sammy
+5. handlebars от плъгините на sammy /може и самостоятелно, може и като плъгин да го ползваме/
+
+---------------------------------------------------------------------------------------------------------------
