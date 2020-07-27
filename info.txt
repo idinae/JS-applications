@@ -11,10 +11,13 @@
 НАШИТЕ СТЪПКИ (т. 4 - работна последователност):
 
 1. Създаване и настройване на приложение в Backendless
+
   - определяме как ще изглежда един обект (филм) в приложението
+
   - създаваме на таблиците Backendless
     * ако потребителят не е аутентификиран - да може само да създава данни, за да може да се регистрира: User - Security Roles - create "V"; за четене: включваме и find
     * ако потребителят трябва да се логва с username - променяме users - name да е identity, махаме constraints от email
+  
   - тестване на таблиците в Postman
     * registration - POST, body: row, json с имената на полетата, както сме ги настроили (username, password), header: нищо
       https://api.backendless.com/application-id/REST-api-key/users/register --POST
@@ -35,17 +38,20 @@
     * без relations: ако ще се въвеждат като стринг, а не с objectId - по-лесно е да няма релации - въвежда се стрингова колона
 
 2. Настройваме приложението
+
   - инсталираме библиотеки - задължителните за проекта и тези, които ние ще ползваме: 
     * npm i - инсталира нужното от package.json
     * npm i --save sammy (npm i -E sammy)
     * npm i --save handlebars
     * npm audit fix - fix-ва някои vulnerability в инсталираните plugins
+
   - настройваме index.html да чете библиотеките - базовите библиотеки трябва да са в head!!!!!!!!
     * местим тези, които са базови и са в body и добавяме останалите: sammy и handlebars + plugin за handlebars в sammy:
       <script src="./node_modules/handlebars/dist/handlebars.min.js"></script>
       <script src="./node_modules/sammy/lib/min/sammy-0.7.6.min.js"></script>
       <script src="./node_modules/sammy/lib/min/plugins/sammy.handlebars-0.7.6.min.js"></script>
     * отваряме index.html, за да видим, че не ни дава грешки в конзолата
+
   - публикуване в github: 
     * git init
     * добавяме файл .gitignore, за да не качва всичко
@@ -56,12 +62,17 @@
     * създаваме ново repository в github и изпълняваме дадените command lines:
     git remote add origin https://github.com/idinae/JS-applications.git
     git push -u origin master
+
 3. Пишем приложението
+
   - зареждаме в index.html модула, който ще създаваме:
     <script src="./js/data.js"></script>
     тестваме дали работи: alert('it works!');
+
   - в data.js:
     * тук функциите вършат работа, без да валидират
+    * правим модула за връзка с базата за CRUD операции и login/register на потребителя
+      (без да ги визуализираме в html-a, закачаме функциите към глобалния scope и ги викаме в конзолата)
     * докато data.js не е зареден като модул в index.html, функциите са видни в глобалния скоуп
     * function host(endpoint) + обект endpoints
       -> в localStorage с метода localStorage.setItem('item-name', 'item-value') - взимаме от респонса на логина user-token, username, userId и ги записваме в localStorage
@@ -77,15 +88,52 @@
     * function createMovie() - POST, token, body
     * function updateMovie() - PUT, token, body (само частта, която се ъпдейтва)
     * function deleteMovie() - DELETE, връща час на изтриване
-    * function getMoviesByOwner() - с Where клауза, вж Backendless - Advanced Object Retrieval
+    * function getMovieByOwner() - с Where клауза, вж Backendless - Advanced Object Retrieval
+      https://api.backendless.com/2E0F50CF-1C88-E29E-FFCB-D5154F76D200/0982FDAE-51FA-486C-A1BF-56D31E76D7BF/data/movies?where=ownerId%20%3D%20%27D873AE22-05D4-420B-8BD1-02ECAD09CFAB%27
+      където D873AE22-05D4-420B-8BD1-02ECAD09CFAB е ownerId; има ф-ция encodeURI()
+    * function buyTicket(movie);
 
-  - правим модула за връзка с базата за CRUD операции и login/register на потребителя
-    (без да ги визуализираме в html-a, закачаме функциите към глобалния scope и ги викаме в конзолата)
-  - цепим html-a на основни шаблони
-  - правим рутирането, така че да можем да отворим всеки предвиден html
+  - правим app.js и сменяме в index.html: <script type="module" src="./js/app.js"></script>
+    * тук правим рутирането: така че да можем да отворим всеки предвиден html
+    * тестваме app.js с: alert('it works');
+    * addEventListerner('load'); app = Sammy('#container', function () {}) - в Sammy трябва да е function, не arrow; app.run()
+    * this.get('...', home) - правим рутирането до index.html, / и #/home; 
+      home - функция, която трябва да се дефинира (тук/в контролер) - слагаме я след app.run(), за да я тестваме:
+      function home() { this.swap('<h1>Sammy is working!<h1>'); }
+  
+  - правим темплейтите - от index.html ги пренасяме в отделна папка templates, отделни файлове в подпапки
+    * само ги cut-ваме от index.html и ги слагаме в отделни файлове в templates, статични - за да видим, че рутирането работи!!!!!!
+    * header.hbs
+    * footer.hbs
+    * home.hbs - в случая само снимка с background
+    * user папка - темплейтите за register и login:
+      > registerForm - формата за регистрация слагаме - от index.html cut-paste
+      > register - ние я правим - това ще е страницата, която ще показва формата, ще има header, форма, footer; казваме какво да визуализира, за да покаже header-a и footer-a:
+        {{>header}}
+        {{>registerForm}}
+        {{>footer}}
+      > login, loginForm - аналогично
+    * movie папка - темплейтите за създаване, редактиране, показване, триене и т.н. на movies  
+      > createForm.hbs
+      > editForm.hbs
+      > details.hbs
+      > deleteForm.hbs
+      > catalog - съдържа всички филми, кръщаваме го каталог
+      > my movies - изтриваме го, ще използваме вместо него каталог - структурата е еднаква
+    * на всички създадени страници слагаме в началото и края header, footer (можеше така да са register и login):
+      {{>header}} {{>footer}}
+
+    
+
+
+
   - правим скелетите на контролерите
   - правим индивидуалната бизнес логика на всеки контролер като почваме от login/register
 
+
+
+
+//ОТ ПРЕДИШНИЯ APP
 
 //ПОДГОТОВКА
 

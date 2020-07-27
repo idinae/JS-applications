@@ -22,7 +22,7 @@ async function register(username, password) { //после функцията с
     })).json();
 }
 
-async function login(username, password) { 
+async function login(username, password) {
     const result = await (await fetch(host(endpoints.LOGIN), {
         method: 'POST',
         headers: {
@@ -44,7 +44,7 @@ async function login(username, password) {
 //функциите по-долу се извикват с await, за да си получат данните (и без await ще сработят, но няма да върнат данни)
 async function logout() { //после функцията се пуска с await, за да си получи данните (и без await ще се регистрира) 
     const token = localStorage.getItem('userToken'); //userToken ще го сетнем и вземем от localStorage (localStorage.setItem('name', 'value') и getItem())
-    
+
     return fetch(host(endpoints.LOGOUT), {
         headers: {
             'user-token': token
@@ -77,7 +77,7 @@ async function getMovieById(id) {
 //create movie
 async function createMovie(movie) {
     const token = localStorage.getItem('userToken');
-        
+
     return (await fetch(host(endpoints.MOVIES), {
         method: 'POST',
         headers: {
@@ -91,7 +91,7 @@ async function createMovie(movie) {
 //edit movie
 async function updateMovie(id, updatedProps) {
     const token = localStorage.getItem('userToken');
-        
+
     return (await fetch(host(endpoints.MOVIES + '/' + id), {
         method: 'PUT',
         headers: {
@@ -105,7 +105,7 @@ async function updateMovie(id, updatedProps) {
 //delete movie
 async function deleteMovie(id) {
     const token = localStorage.getItem('userToken');
-        
+
     return (await fetch(host(endpoints.MOVIES + '/' + id), {
         method: 'DELETE',
         headers: {
@@ -116,13 +116,26 @@ async function deleteMovie(id) {
 }
 
 //get movies by userId - search with the Where Clause
-
-
-
-//buy ticket - композитна, защото извиква и updateMovie()
-async function buyTicket(movieId) {
+async function getMoviesByOwner(ownerId) {
     const token = localStorage.getItem('userToken');
 
-//obtain userId
-//make request
+    return (await fetch(host(endpoints.MOVIES + `?where=ownerId%3D%27${ownerId}%27`), {
+        headers: {
+            'Content-Type': 'application/json',
+            'user-token': token
+        }
+    })).json();
+}
+
+//buy ticket - композитна, защото извиква и updateMovie()
+async function buyTicket(movie) {
+    const movieObj = await getMovieById(movie);
+    const newTickets = movieObj.tickets - 1;
+    const movieId = movieObj.objectId;
+    if (newTickets >= 0) {
+        alert(`You have bought a ticket for ${movieObj.title}`);
+        return updateMovie(movieId, {tickets: newTickets});
+    } else {
+        alert(`There are not tickets for ${movieObj.title}`);
+    }
 }
